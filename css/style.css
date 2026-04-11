@@ -1249,6 +1249,53 @@ ul { list-style: none; }
   transform: translateY(0);
 }
 
+.grants-intro {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  margin-top: -1.5rem;
+}
+
+.grants-role-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.82rem;
+  margin: 2.5rem 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.grants-role-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.grant-badge-init { background: linear-gradient(135deg, #059669, #10b981); }
+.grant-badge-sponsor { background: linear-gradient(135deg, #0099cc, #00d4ff); }
+.grant-badge-assoc { background: linear-gradient(135deg, #6b7280, #9ca3af); }
+.grant-badge-spain { background: linear-gradient(135deg, #b91c1c, #ef4444); }
+
+.grants-grid-secondary { opacity: 0.92; }
+
+.grant-card-secondary {
+  border-color: rgba(255,255,255,0.05);
+}
+
+.grant-card-secondary h4 {
+  font-size: 0.95rem;
+}
+
+.grant-card-secondary p {
+  font-size: 0.85rem;
+}
+
 /* ===== PEER REVIEW GRID ===== */
 .peer-review-grid {
   display: grid;
