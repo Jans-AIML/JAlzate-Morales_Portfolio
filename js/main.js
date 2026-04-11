@@ -281,6 +281,25 @@ if (contactForm) {
   });
 }
 
+// ===== PUBLICATION YEAR FILTERS =====
+const pubFilterBtns = document.querySelectorAll('.pub-filter-btn');
+const pubCards      = document.querySelectorAll('.pub-card');
+
+pubFilterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    pubFilterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const filter = btn.getAttribute('data-filter');
+
+    pubCards.forEach(card => {
+      const year = card.getAttribute('data-year');
+      const show = filter === 'all' || year === filter;
+      card.classList.toggle('pub-hidden', !show);
+    });
+  });
+});
+
 // ===== SMOOTH SCROLL FOR ANCHOR LINKS =====
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', (e) => {
