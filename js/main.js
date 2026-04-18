@@ -35,7 +35,7 @@ navLinks.querySelectorAll('a').forEach(link => {
   });
 });
 
-// ===== HERO CANVAS — PARTICLE NETWORK =====
+// ===== HERO CANVAS — HYBRID SCIENCE CONVERGENCE (Chemistry + Biology + AI/ML) =====
 (function initCanvas() {
   const canvas = document.getElementById('hero-canvas');
   if (!canvas) return;
@@ -44,13 +44,17 @@ navLinks.querySelectorAll('a').forEach(link => {
   let W, H, particles, animFrame;
 
   const CONFIG = {
-    count:      80,
-    speed:      0.35,
-    radius:     2,
-    lineRange:  140,
-    colorNode:  'rgba(0, 212, 255, 0.55)',
-    colorLine:  'rgba(0, 212, 255, ',
-    colorSec:   'rgba(124, 58, 237, 0.4)',
+    count:       100,
+    speed:       0.2,
+    radius:      2,
+    lineRange:   160,
+    // Gradient colors: Blue (DNA/Biology) → Green (Chemistry) → Purple (AI/ML)
+    colorGradient: [
+      { hue: 200, sat: 100, light: 55, label: 'DNA' },        // Cyan-Blue (Biology)
+      { hue: 160, sat: 85,  light: 50, label: 'Molecule' },   // Teal-Green (Chemistry)
+      { hue: 130, sat: 70,  light: 48, label: 'Catalyst' },   // Green (Chemistry)
+      { hue: 280, sat: 100, light: 60, label: 'AI' },         // Purple (AI/ML)
+    ],
   };
 
   function resize() {
@@ -60,43 +64,82 @@ navLinks.querySelectorAll('a').forEach(link => {
   }
 
   function initParticles() {
-    particles = Array.from({ length: CONFIG.count }, () => ({
-      x:  Math.random() * W,
-      y:  Math.random() * H,
-      vx: (Math.random() - 0.5) * CONFIG.speed,
-      vy: (Math.random() - 0.5) * CONFIG.speed,
-      r:  Math.random() * CONFIG.radius + 0.8,
-    }));
+    particles = Array.from({ length: CONFIG.count }, (_, i) => {
+      const colorIndex = i % CONFIG.colorGradient.length;
+      const gradient = CONFIG.colorGradient[colorIndex];
+      return {
+        x:     Math.random() * W,
+        y:     Math.random() * H,
+        vx:    (Math.random() - 0.5) * CONFIG.speed,
+        vy:    (Math.random() - 0.5) * CONFIG.speed,
+        r:     Math.random() * CONFIG.radius + 1,
+        type:  gradient.label,
+        hue:   gradient.hue,
+        sat:   gradient.sat,
+        light: gradient.light,
+        angle: Math.random() * Math.PI * 2,
+        phase: Math.random() * Math.PI * 2,
+      };
+    });
+  }
+
+  function getParticleColor(particle, opacity = 1) {
+    return `hsla(${particle.hue}, ${particle.sat}%, ${particle.light}%, ${opacity})`;
   }
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
-    particles.forEach(p => {
+    // Draw and animate particles
+    particles.forEach((p, idx) => {
+      // Gentle pulsing and orbital motion
+      const pulse = 0.8 + 0.2 * Math.sin(Date.now() * 0.0008 + p.phase);
       p.x += p.vx;
       p.y += p.vy;
+      
+      // Soft boundary bounce
       if (p.x < 0 || p.x > W) p.vx *= -1;
       if (p.y < 0 || p.y > H) p.vy *= -1;
 
+      // Draw particle with pulsing size
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = Math.random() > 0.85 ? CONFIG.colorSec : CONFIG.colorNode;
+      ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = getParticleColor(p, 0.65);
       ctx.fill();
+
+      // Subtle glow ring on some particles (AI/ML emphasis)
+      if (p.type === 'AI' && Math.random() > 0.7) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * pulse * 1.8, 0, Math.PI * 2);
+        ctx.strokeStyle = getParticleColor(p, 0.15);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
     });
 
+    // Draw connections with color-sensitive weighting
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
-        const dx   = particles[i].x - particles[j].x;
-        const dy   = particles[i].y - particles[j].y;
+        const p1 = particles[i];
+        const p2 = particles[j];
+        const dx   = p1.x - p2.x;
+        const dy   = p1.y - p2.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < CONFIG.lineRange) {
-          const opacity = (1 - dist / CONFIG.lineRange) * 0.35;
+          const opacity = (1 - dist / CONFIG.lineRange) * 0.25;
+          
+          // Blend colors at connection points
+          const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+          gradient.addColorStop(0, getParticleColor(p1, opacity * 1.2));
+          gradient.addColorStop(0.5, `hsla(${(p1.hue + p2.hue) / 2}, ${(p1.sat + p2.sat) / 2}%, ${(p1.light + p2.light) / 2}%, ${opacity})`);
+          gradient.addColorStop(1, getParticleColor(p2, opacity * 1.2));
+
           ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = CONFIG.colorLine + opacity + ')';
-          ctx.lineWidth   = 0.8;
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 0.7;
           ctx.stroke();
         }
       }
