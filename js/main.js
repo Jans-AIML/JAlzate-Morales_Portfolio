@@ -1,5 +1,6 @@
 /* ============================================================
    JANS ALZATE-MORALES — Portfolio Main JavaScript
+   Updated: April 18, 2026 (Hybrid Canvas + GSS Co-op)
    ============================================================ */
 
 'use strict';
