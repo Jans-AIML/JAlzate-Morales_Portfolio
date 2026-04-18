@@ -1092,6 +1092,84 @@ ul { list-style: none; }
   color: var(--accent-light);
 }
 
+/* ===== WELLNESS SECTION ===== */
+.wellness-card {
+  padding: 2.5rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.wellness-icon {
+  width: 72px;
+  height: 72px;
+  background: var(--gradient-accent);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.running-icon i { font-size: 1.8rem; color: #fff; }
+
+.wellness-content { flex: 1; }
+
+.running-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.running-event {
+  padding: 1rem;
+  background: rgba(99,102,241,0.05);
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.running-event:hover {
+  background: rgba(99,102,241,0.12);
+  border-color: rgba(99,102,241,0.35);
+  transform: translateY(-2px);
+}
+
+.running-event i {
+  font-size: 1.8rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.running-event h4 {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.3rem;
+}
+
+.running-event p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.event-tag {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: rgba(99,102,241,0.2);
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 50px;
+}
+
 /* ===== CONTACT SECTION ===== */
 .contact-grid {
   display: grid;
@@ -1364,6 +1442,33 @@ ul { list-style: none; }
 
 .grant-card-secondary p {
   font-size: 0.85rem;
+}
+
+.researcher-info {
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(99, 102, 241, 0.08);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  color: var(--text-secondary);
+}
+
+.researcher-info a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.researcher-info a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.researcher-info i {
+  margin-left: 0.25rem;
+  font-size: 0.9rem;
 }
 
 /* ===== PEER REVIEW GRID ===== */
