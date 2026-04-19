@@ -38,120 +38,128 @@ navLinks.querySelectorAll('a').forEach(link => {
 
 // ===== HERO CANVAS — HYBRID SCIENCE CONVERGENCE (Chemistry + Biology + AI/ML) =====
 (function initCanvas() {
-  const canvas = document.getElementById('hero-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  try {
+    const canvas = document.getElementById('hero-canvas');
+    if (!canvas) {
+      console.warn('Canvas element not found');
+      return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Could not get 2D context');
+      return;
+    }
 
-  let W, H, particles, animFrame;
+    let W, H, particles, animFrame;
 
-  const CONFIG = {
-    count:       100,
-    speed:       0.2,
-    radius:      2,
-    lineRange:   160,
-    // Gradient colors: Blue (DNA/Biology) → Green (Chemistry) → Purple (AI/ML)
-    colorGradient: [
-      { hue: 200, sat: 100, light: 55, label: 'DNA' },        // Cyan-Blue (Biology)
-      { hue: 160, sat: 85,  light: 50, label: 'Molecule' },   // Teal-Green (Chemistry)
-      { hue: 130, sat: 70,  light: 48, label: 'Catalyst' },   // Green (Chemistry)
-      { hue: 280, sat: 100, light: 60, label: 'AI' },         // Purple (AI/ML)
-    ],
-  };
+    const CONFIG = {
+      count:       100,
+      speed:       0.2,
+      radius:      2,
+      lineRange:   160,
+      colorGradient: [
+        { hue: 200, sat: 100, light: 55, label: 'DNA' },      // Blue (Biology)
+        { hue: 160, sat: 85,  light: 50, label: 'Molecule' }, // Teal (Chemistry)
+        { hue: 130, sat: 70,  light: 48, label: 'Catalyst' }, // Green (Chemistry)
+        { hue: 280, sat: 100, light: 60, label: 'AI' },       // Purple (AI/ML)
+      ],
+    };
 
-  function resize() {
-    W = canvas.width  = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
-    initParticles();
-  }
+    function resize() {
+      W = canvas.width  = canvas.offsetWidth;
+      H = canvas.height = canvas.offsetHeight;
+      initParticles();
+    }
 
-  function initParticles() {
-    particles = Array.from({ length: CONFIG.count }, (_, i) => {
-      const colorIndex = i % CONFIG.colorGradient.length;
-      const gradient = CONFIG.colorGradient[colorIndex];
-      return {
-        x:     Math.random() * W,
-        y:     Math.random() * H,
-        vx:    (Math.random() - 0.5) * CONFIG.speed,
-        vy:    (Math.random() - 0.5) * CONFIG.speed,
-        r:     Math.random() * CONFIG.radius + 1,
-        type:  gradient.label,
-        hue:   gradient.hue,
-        sat:   gradient.sat,
-        light: gradient.light,
-        angle: Math.random() * Math.PI * 2,
-        phase: Math.random() * Math.PI * 2,
-      };
-    });
-  }
-
-  function getParticleColor(particle, opacity = 1) {
-    return `hsla(${particle.hue}, ${particle.sat}%, ${particle.light}%, ${opacity})`;
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-
-    // Draw and animate particles
-    particles.forEach((p, idx) => {
-      // Gentle pulsing and orbital motion
-      const pulse = 0.8 + 0.2 * Math.sin(Date.now() * 0.0008 + p.phase);
-      p.x += p.vx;
-      p.y += p.vy;
-      
-      // Soft boundary bounce
-      if (p.x < 0 || p.x > W) p.vx *= -1;
-      if (p.y < 0 || p.y > H) p.vy *= -1;
-
-      // Draw particle with pulsing size
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
-      ctx.fillStyle = getParticleColor(p, 0.65);
-      ctx.fill();
-
-      // Subtle glow ring on some particles (AI/ML emphasis)
-      if (p.type === 'AI' && Math.random() > 0.7) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * pulse * 1.8, 0, Math.PI * 2);
-        ctx.strokeStyle = getParticleColor(p, 0.15);
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-    });
-
-    // Draw connections with color-sensitive weighting
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const p1 = particles[i];
-        const p2 = particles[j];
-        const dx   = p1.x - p2.x;
-        const dy   = p1.y - p2.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < CONFIG.lineRange) {
-          const opacity = (1 - dist / CONFIG.lineRange) * 0.25;
-          
-          // Blend colors at connection points
-          const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-          gradient.addColorStop(0, getParticleColor(p1, opacity * 1.2));
-          gradient.addColorStop(0.5, `hsla(${(p1.hue + p2.hue) / 2}, ${(p1.sat + p2.sat) / 2}%, ${(p1.light + p2.light) / 2}%, ${opacity})`);
-          gradient.addColorStop(1, getParticleColor(p2, opacity * 1.2));
-
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.strokeStyle = gradient;
-          ctx.lineWidth = 0.7;
-          ctx.stroke();
-        }
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < CONFIG.count; i++) {
+        const colorIndex = i % CONFIG.colorGradient.length;
+        const col = CONFIG.colorGradient[colorIndex];
+        particles.push({
+          x:     Math.random() * W,
+          y:     Math.random() * H,
+          vx:    (Math.random() - 0.5) * CONFIG.speed,
+          vy:    (Math.random() - 0.5) * CONFIG.speed,
+          r:     Math.random() * CONFIG.radius + 1,
+          type:  col.label,
+          hue:   col.hue,
+          sat:   col.sat,
+          light: col.light,
+          phase: Math.random() * Math.PI * 2,
+        });
       }
     }
 
-    animFrame = requestAnimationFrame(draw);
-  }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      const now = Date.now();
 
-  window.addEventListener('resize', resize);
-  resize();
-  draw();
+      // Draw particles
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const pulse = 0.8 + 0.2 * Math.sin(now * 0.0008 + p.phase);
+        
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, 0.65)`;
+        ctx.fill();
+
+        if (p.type === 'AI' && Math.random() > 0.7) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * pulse * 1.8, 0, Math.PI * 2);
+          ctx.strokeStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, 0.15)`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      // Draw connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const p1 = particles[i];
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < CONFIG.lineRange) {
+            const opacity = (1 - dist / CONFIG.lineRange) * 0.25;
+            const midHue = (p1.hue + p2.hue) / 2;
+            const midSat = (p1.sat + p2.sat) / 2;
+            const midLight = (p1.light + p2.light) / 2;
+
+            const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+            grad.addColorStop(0, `hsla(${p1.hue}, ${p1.sat}%, ${p1.light}%, ${opacity * 1.2})`);
+            grad.addColorStop(0.5, `hsla(${midHue}, ${midSat}%, ${midLight}%, ${opacity})`);
+            grad.addColorStop(1, `hsla(${p2.hue}, ${p2.sat}%, ${p2.light}%, ${opacity * 1.2})`);
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 0.7;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animFrame = requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    draw();
+    console.log('✓ Hybrid science convergence canvas initialized');
+  } catch (error) {
+    console.error('Canvas initialization error:', error);
+  }
 })();
 
 // ===== TYPED TEXT EFFECT =====
