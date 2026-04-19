@@ -36,129 +36,155 @@ navLinks.querySelectorAll('a').forEach(link => {
   });
 });
 
-// ===== HERO CANVAS — HYBRID SCIENCE CONVERGENCE (Chemistry + Biology + AI/ML) =====
+// ===== HERO CANVAS — DNA + NEURAL NETWORK HYBRID BACKGROUND =====
 (function initCanvas() {
   try {
     const canvas = document.getElementById('hero-canvas');
-    if (!canvas) {
-      console.warn('Canvas element not found');
-      return;
-    }
-    
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      console.error('Could not get 2D context');
-      return;
-    }
+    if (!ctx) return;
 
-    let W, H, particles, animFrame;
-
+    let W, H, animFrame, time = 0;
+    
     const CONFIG = {
-      count:       100,
-      speed:       0.2,
-      radius:      2,
-      lineRange:   160,
-      colorGradient: [
-        { hue: 200, sat: 100, light: 55, label: 'DNA' },      // Blue (Biology)
-        { hue: 160, sat: 85,  light: 50, label: 'Molecule' }, // Teal (Chemistry)
-        { hue: 130, sat: 70,  light: 48, label: 'Catalyst' }, // Green (Chemistry)
-        { hue: 280, sat: 100, light: 60, label: 'AI' },       // Purple (AI/ML)
-      ],
+      dnaHelices: 3,        // Multiple DNA strands
+      neuronsPerLayer: 15,
+      layers: 3,
+      speed: 0.0003,        // Very slow motion
     };
 
     function resize() {
-      W = canvas.width  = canvas.offsetWidth;
+      W = canvas.width = canvas.offsetWidth;
       H = canvas.height = canvas.offsetHeight;
-      initParticles();
     }
 
-    function initParticles() {
-      particles = [];
-      for (let i = 0; i < CONFIG.count; i++) {
-        const colorIndex = i % CONFIG.colorGradient.length;
-        const col = CONFIG.colorGradient[colorIndex];
-        particles.push({
-          x:     Math.random() * W,
-          y:     Math.random() * H,
-          vx:    (Math.random() - 0.5) * CONFIG.speed,
-          vy:    (Math.random() - 0.5) * CONFIG.speed,
-          r:     Math.random() * CONFIG.radius + 1,
-          type:  col.label,
-          hue:   col.hue,
-          sat:   col.sat,
-          light: col.light,
-          phase: Math.random() * Math.PI * 2,
-        });
+    function drawDNAHelix(x, startY, length, rotation, hue, time) {
+      const turns = 4;
+      const spacing = length / (turns * 100);
+      
+      ctx.save();
+      ctx.translate(x, startY);
+      ctx.rotate(rotation);
+      
+      // Left and right strands of DNA
+      for (let i = 0; i < length; i += spacing) {
+        const angle = (i / length) * Math.PI * 2 * turns + time;
+        const radius = 40;
+        
+        // Left strand (blue hue)
+        const x1 = Math.cos(angle) * radius;
+        const y1 = i;
+        ctx.beginPath();
+        ctx.arc(x1, y1, 3, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 85%, 55%, 0.6)`;
+        ctx.fill();
+        
+        // Right strand (purple/magenta hue)
+        const x2 = Math.cos(angle + Math.PI) * radius;
+        const y2 = i;
+        ctx.beginPath();
+        ctx.arc(x2, y2, 3, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue + 80}, 80%, 60%, 0.6)`;
+        ctx.fill();
+        
+        // Connecting rungs (like DNA crossbars)
+        if (i % (spacing * 5) === 0) {
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.strokeStyle = `hsla(${hue + 40}, 70%, 50%, 0.4)`;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+      }
+      
+      ctx.restore();
+    }
+
+    function drawNeuralNetwork(startX, startY, size, time) {
+      const nodeRadius = 4;
+      const nodes = [];
+      
+      // Create neural network layers
+      for (let layer = 0; layer < CONFIG.layers; layer++) {
+        const layerX = startX + (layer * size) / CONFIG.layers;
+        const layerY = startY - size / 2;
+        
+        for (let i = 0; i < CONFIG.neuronsPerLayer; i++) {
+          const y = layerY + (i * size) / CONFIG.neuronsPerLayer;
+          
+          // Pulsing effect
+          const pulse = 0.8 + 0.2 * Math.sin(time + i * 0.2);
+          
+          // Draw neuron
+          ctx.beginPath();
+          ctx.arc(layerX, y, nodeRadius * pulse, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(270, 85%, 55%, ${0.7 * pulse})`;
+          ctx.fill();
+          
+          // Glow effect
+          ctx.beginPath();
+          ctx.arc(layerX, y, nodeRadius * pulse * 2, 0, Math.PI * 2);
+          ctx.strokeStyle = `hsla(270, 80%, 60%, ${0.3 * pulse})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          
+          nodes.push({ x: layerX, y: y, layer: layer, index: i });
+        }
+      }
+      
+      // Draw synaptic connections
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const n1 = nodes[i];
+          const n2 = nodes[j];
+          
+          // Only connect nearby neurons
+          if (Math.abs(n1.layer - n2.layer) === 1 && Math.abs(n1.index - n2.index) <= 2) {
+            const dist = Math.sqrt(Math.pow(n2.x - n1.x, 2) + Math.pow(n2.y - n1.y, 2));
+            const opacity = Math.max(0, 0.5 - dist / 200);
+            
+            if (opacity > 0) {
+              ctx.beginPath();
+              ctx.moveTo(n1.x, n1.y);
+              ctx.lineTo(n2.x, n2.y);
+              ctx.strokeStyle = `hsla(280, 75%, 58%, ${opacity * 0.4})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+        }
       }
     }
 
     function draw() {
-      ctx.clearRect(0, 0, W, H);
-      const now = Date.now();
-
-      // Draw particles
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        const pulse = 0.8 + 0.2 * Math.sin(now * 0.0008 + p.phase);
-        
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > W) p.vx *= -1;
-        if (p.y < 0 || p.y > H) p.vy *= -1;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, 0.65)`;
-        ctx.fill();
-
-        if (p.type === 'AI' && Math.random() > 0.7) {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * pulse * 1.8, 0, Math.PI * 2);
-          ctx.strokeStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, 0.15)`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      }
-
-      // Draw connections
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const p1 = particles[i];
-          const p2 = particles[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < CONFIG.lineRange) {
-            const opacity = (1 - dist / CONFIG.lineRange) * 0.25;
-            const midHue = (p1.hue + p2.hue) / 2;
-            const midSat = (p1.sat + p2.sat) / 2;
-            const midLight = (p1.light + p2.light) / 2;
-
-            const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-            grad.addColorStop(0, `hsla(${p1.hue}, ${p1.sat}%, ${p1.light}%, ${opacity * 1.2})`);
-            grad.addColorStop(0.5, `hsla(${midHue}, ${midSat}%, ${midLight}%, ${opacity})`);
-            grad.addColorStop(1, `hsla(${p2.hue}, ${p2.sat}%, ${p2.light}%, ${opacity * 1.2})`);
-
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 0.7;
-            ctx.stroke();
-          }
-        }
-      }
-
+      // Clear canvas with subtle gradient background
+      const gradient = ctx.createLinearGradient(0, 0, W, H);
+      gradient.addColorStop(0, 'rgba(10, 15, 35, 0.98)');
+      gradient.addColorStop(1, 'rgba(15, 10, 30, 0.98)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, W, H);
+      
+      time += CONFIG.speed;
+      
+      // Draw DNA helices at different angles
+      drawDNAHelix(W * 0.2, H * 0.5, H * 0.8, -0.3, 200, time);
+      drawDNAHelix(W * 0.5, H * 0.5, H * 0.8, 0, 160, time * 0.7);
+      drawDNAHelix(W * 0.8, H * 0.5, H * 0.8, 0.3, 130, time * 0.5);
+      
+      // Draw neural networks
+      drawNeuralNetwork(W * 0.15, H * 0.3, H * 0.5, time * 2);
+      drawNeuralNetwork(W * 0.65, H * 0.4, H * 0.4, time * 1.5);
+      
       animFrame = requestAnimationFrame(draw);
     }
 
     window.addEventListener('resize', resize);
     resize();
     draw();
-    console.log('✓ Hybrid science convergence canvas initialized');
+    console.log('✓ DNA + Neural Network hybrid background initialized');
   } catch (error) {
-    console.error('Canvas initialization error:', error);
+    console.error('Canvas error:', error);
   }
 })();
 
