@@ -36,7 +36,7 @@ navLinks.querySelectorAll('a').forEach(link => {
   });
 });
 
-// ===== HERO CANVAS — DNA + NEURAL NETWORK HYBRID BACKGROUND =====
+// ===== HERO CANVAS — ZONED BACKGROUND: CHEMISTRY | BIOLOGY | AI/ML =====
 (function initCanvas() {
   try {
     const canvas = document.getElementById('hero-canvas');
@@ -46,143 +46,210 @@ navLinks.querySelectorAll('a').forEach(link => {
 
     let W, H, animFrame, time = 0;
     
-    const CONFIG = {
-      dnaHelices: 3,        // Multiple DNA strands
-      neuronsPerLayer: 15,
-      layers: 3,
-      speed: 0.0003,        // Very slow motion
-    };
-
     function resize() {
       W = canvas.width = canvas.offsetWidth;
       H = canvas.height = canvas.offsetHeight;
     }
 
-    function drawDNAHelix(x, startY, length, rotation, hue, time) {
-      const turns = 4;
-      const spacing = length / (turns * 100);
-      
-      ctx.save();
-      ctx.translate(x, startY);
-      ctx.rotate(rotation);
-      
-      // Left and right strands of DNA
-      for (let i = 0; i < length; i += spacing) {
-        const angle = (i / length) * Math.PI * 2 * turns + time;
-        const radius = 40;
+    // ===== CHEMISTRY ZONE (Left) =====
+    function drawChemistry(time) {
+      const zones = { x: 0, width: W / 3 };
+      const gradient = ctx.createLinearGradient(zones.x, 0, zones.x + zones.width, 0);
+      gradient.addColorStop(0, 'rgba(15, 25, 50, 0.95)');
+      gradient.addColorStop(1, 'rgba(20, 30, 55, 0.85)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(zones.x, 0, zones.width, H);
+
+      // Molecular structures: simple hexagons (benzene rings)
+      const moleculeY = H / 2 + Math.sin(time * 0.5) * 20;
+      const molecules = [
+        { x: zones.width * 0.25, y: moleculeY - 100, size: 25, rotation: time * 0.3 },
+        { x: zones.width * 0.75, y: moleculeY + 80, size: 30, rotation: time * 0.2 },
+      ];
+
+      molecules.forEach(mol => {
+        ctx.save();
+        ctx.translate(mol.x, mol.y);
+        ctx.rotate(mol.rotation);
         
-        // Left strand (blue hue)
-        const x1 = Math.cos(angle) * radius;
-        const y1 = i;
+        // Draw hexagon (benzene ring)
         ctx.beginPath();
-        ctx.arc(x1, y1, 3, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${hue}, 85%, 55%, 0.6)`;
-        ctx.fill();
-        
-        // Right strand (purple/magenta hue)
-        const x2 = Math.cos(angle + Math.PI) * radius;
-        const y2 = i;
-        ctx.beginPath();
-        ctx.arc(x2, y2, 3, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${hue + 80}, 80%, 60%, 0.6)`;
-        ctx.fill();
-        
-        // Connecting rungs (like DNA crossbars)
-        if (i % (spacing * 5) === 0) {
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.strokeStyle = `hsla(${hue + 40}, 70%, 50%, 0.4)`;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
+        for (let i = 0; i < 6; i++) {
+          const angle = (i * Math.PI) / 3;
+          const x = Math.cos(angle) * mol.size;
+          const y = Math.sin(angle) * mol.size;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
+        ctx.closePath();
+        ctx.strokeStyle = `hsla(200, 100%, 60%, 0.6)`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Atoms at vertices
+        for (let i = 0; i < 6; i++) {
+          const angle = (i * Math.PI) / 3;
+          const x = Math.cos(angle) * mol.size;
+          const y = Math.sin(angle) * mol.size;
+          ctx.beginPath();
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(200, 90%, 65%, 0.7)`;
+          ctx.fill();
+        }
+        
+        ctx.restore();
+      });
+
+      // Floating single atoms (electrons)
+      for (let i = 0; i < 8; i++) {
+        const x = zones.x + Math.random() * zones.width;
+        const y = H * 0.2 + Math.sin(time * 0.4 + i) * H * 0.3;
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(160, 85%, 50%, ${0.4 + 0.2 * Math.sin(time + i)})`;
+        ctx.fill();
       }
-      
-      ctx.restore();
     }
 
-    function drawNeuralNetwork(startX, startY, size, time) {
-      const nodeRadius = 4;
-      const nodes = [];
-      
-      // Create neural network layers
-      for (let layer = 0; layer < CONFIG.layers; layer++) {
-        const layerX = startX + (layer * size) / CONFIG.layers;
-        const layerY = startY - size / 2;
+    // ===== BIOLOGY ZONE (Center) =====
+    function drawBiology(time) {
+      const zones = { x: W / 3, width: W / 3 };
+      const gradient = ctx.createLinearGradient(zones.x, 0, zones.x + zones.width, 0);
+      gradient.addColorStop(0, 'rgba(20, 30, 55, 0.85)');
+      gradient.addColorStop(0.5, 'rgba(25, 35, 50, 0.9)');
+      gradient.addColorStop(1, 'rgba(20, 30, 55, 0.85)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(zones.x, 0, zones.width, H);
+
+      // Organic flowing shapes (like cells or organisms)
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i++) {
+        const progress = i / 100;
+        const x = zones.x + zones.width * progress;
+        const y = H / 2 + Math.sin(progress * Math.PI * 3 + time * 0.6) * 60 + 
+                  Math.cos(progress * Math.PI * 2 + time * 0.4) * 40;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = `hsla(130, 75%, 55%, 0.5)`;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Secondary flowing line
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i++) {
+        const progress = i / 100;
+        const x = zones.x + zones.width * progress;
+        const y = H / 2 - Math.sin(progress * Math.PI * 2.5 + time * 0.5) * 50 + 
+                  Math.cos(progress * Math.PI * 3 + time * 0.3) * 35;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = `hsla(160, 80%, 50%, 0.4)`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Pulsing cell-like structures
+      const cellCount = 4;
+      for (let i = 0; i < cellCount; i++) {
+        const cellX = zones.x + zones.width * (0.2 + i * 0.2);
+        const cellY = H / 2 + Math.sin(time * 0.4 + i * 1.5) * 80;
+        const pulse = 0.7 + 0.3 * Math.sin(time * 0.5 + i);
         
-        for (let i = 0; i < CONFIG.neuronsPerLayer; i++) {
-          const y = layerY + (i * size) / CONFIG.neuronsPerLayer;
+        ctx.beginPath();
+        ctx.arc(cellX, cellY, 20 * pulse, 0, Math.PI * 2);
+        ctx.strokeStyle = `hsla(150, 70%, 60%, ${0.5 * pulse})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+
+    // ===== AI/ML ZONE (Right) =====
+    function drawAIMath(time) {
+      const zones = { x: (W * 2) / 3, width: W / 3 };
+      const gradient = ctx.createLinearGradient(zones.x, 0, zones.x + zones.width, 0);
+      gradient.addColorStop(0, 'rgba(20, 30, 55, 0.85)');
+      gradient.addColorStop(1, 'rgba(15, 20, 45, 0.95)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(zones.x, 0, zones.width, H);
+
+      // Neural network nodes in grid
+      const gridX = 4, gridY = 4;
+      const nodeSize = zones.width / (gridX + 1);
+      const nodeYSize = H / (gridY + 1);
+      const nodes = [];
+
+      for (let gx = 1; gx <= gridX; gx++) {
+        for (let gy = 1; gy <= gridY; gy++) {
+          const x = zones.x + nodeSize * gx;
+          const y = nodeYSize * gy;
           
-          // Pulsing effect
-          const pulse = 0.8 + 0.2 * Math.sin(time + i * 0.2);
+          const pulse = 0.6 + 0.4 * Math.sin(time * 0.7 + gx * 0.3 + gy * 0.2);
           
-          // Draw neuron
+          // Draw node
           ctx.beginPath();
-          ctx.arc(layerX, y, nodeRadius * pulse, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(270, 85%, 55%, ${0.7 * pulse})`;
+          ctx.arc(x, y, 5 * pulse, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(270, 100%, 60%, ${0.7 * pulse})`;
           ctx.fill();
-          
-          // Glow effect
+
+          // Glow
           ctx.beginPath();
-          ctx.arc(layerX, y, nodeRadius * pulse * 2, 0, Math.PI * 2);
-          ctx.strokeStyle = `hsla(270, 80%, 60%, ${0.3 * pulse})`;
+          ctx.arc(x, y, 10 * pulse, 0, Math.PI * 2);
+          ctx.strokeStyle = `hsla(270, 90%, 65%, ${0.2 * pulse})`;
           ctx.lineWidth = 1;
           ctx.stroke();
-          
-          nodes.push({ x: layerX, y: y, layer: layer, index: i });
+
+          nodes.push({ x, y });
         }
       }
-      
-      // Draw synaptic connections
+
+      // Connect nearby nodes
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
-          const n1 = nodes[i];
-          const n2 = nodes[j];
+          const dx = nodes[j].x - nodes[i].x;
+          const dy = nodes[j].y - nodes[i].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
           
-          // Only connect nearby neurons
-          if (Math.abs(n1.layer - n2.layer) === 1 && Math.abs(n1.index - n2.index) <= 2) {
-            const dist = Math.sqrt(Math.pow(n2.x - n1.x, 2) + Math.pow(n2.y - n1.y, 2));
-            const opacity = Math.max(0, 0.5 - dist / 200);
+          if (dist < nodeSize * 1.2 && dist > 0) {
+            const opacity = Math.max(0, 0.4 - dist / (nodeSize * 2));
             
-            if (opacity > 0) {
-              ctx.beginPath();
-              ctx.moveTo(n1.x, n1.y);
-              ctx.lineTo(n2.x, n2.y);
-              ctx.strokeStyle = `hsla(280, 75%, 58%, ${opacity * 0.4})`;
-              ctx.lineWidth = 0.8;
-              ctx.stroke();
-            }
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `hsla(280, 80%, 55%, ${opacity * 0.3})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
           }
         }
+      }
+
+      // Data flow lines
+      for (let i = 0; i < 3; i++) {
+        const flowY = H * (0.2 + i * 0.3) + Math.sin(time * 0.6 + i) * 20;
+        ctx.beginPath();
+        ctx.moveTo(zones.x, flowY);
+        ctx.lineTo(zones.x + zones.width, flowY);
+        ctx.strokeStyle = `hsla(260, 75%, 50%, ${0.2 + 0.1 * Math.sin(time + i)})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
     }
 
     function draw() {
-      // Clear canvas with subtle gradient background
-      const gradient = ctx.createLinearGradient(0, 0, W, H);
-      gradient.addColorStop(0, 'rgba(10, 15, 35, 0.98)');
-      gradient.addColorStop(1, 'rgba(15, 10, 30, 0.98)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, W, H);
+      time += 0.016; // ~60fps
       
-      time += CONFIG.speed;
-      
-      // Draw DNA helices at different angles
-      drawDNAHelix(W * 0.2, H * 0.5, H * 0.8, -0.3, 200, time);
-      drawDNAHelix(W * 0.5, H * 0.5, H * 0.8, 0, 160, time * 0.7);
-      drawDNAHelix(W * 0.8, H * 0.5, H * 0.8, 0.3, 130, time * 0.5);
-      
-      // Draw neural networks
-      drawNeuralNetwork(W * 0.15, H * 0.3, H * 0.5, time * 2);
-      drawNeuralNetwork(W * 0.65, H * 0.4, H * 0.4, time * 1.5);
-      
+      // Draw all three zones
+      drawChemistry(time);
+      drawBiology(time);
+      drawAIMath(time);
+
       animFrame = requestAnimationFrame(draw);
     }
 
     window.addEventListener('resize', resize);
     resize();
     draw();
-    console.log('✓ DNA + Neural Network hybrid background initialized');
+    console.log('✓ Zoned background: Chemistry | Biology | AI/ML initialized');
   } catch (error) {
     console.error('Canvas error:', error);
   }
